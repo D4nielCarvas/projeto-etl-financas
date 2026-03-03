@@ -1,14 +1,7 @@
 import pandas as pd
-import numpy as np
 
 def transform_data(df: pd.DataFrame, cotacoes: dict) -> pd.DataFrame:
-    """
-    Realiza a limpeza e transformação dos dados:
-    1. Remove duplicatas.
-    2. Trata valores nulos (remove linhas sem valor da transação).
-    3. Converte valores de BRL para USD e EUR com base nas cotações.
-    4. Cria a coluna categórica 'faixa_valor' (Small, Medium, High).
-    """
+    
     # 1. Removendo duplicatas baseadas em todas as colunas
     df_transformed = df.drop_duplicates().copy()
     
@@ -26,14 +19,15 @@ def transform_data(df: pd.DataFrame, cotacoes: dict) -> pd.DataFrame:
     df_transformed['valor_usd'] = round(df_transformed['valor_brl'] / usd_rate, 2)
     df_transformed['valor_eur'] = round(df_transformed['valor_brl'] / eur_rate, 2)
     
-    # 4. Criando coluna categórica (faixa_valor) com np.select
-    # Regra de negócio estipulada: < 200: Small | >= 200 e <= 1000: Medium | > 1000: High
-    condicoes = [
-        (df_transformed['valor_brl'] < 200),
-        (df_transformed['valor_brl'] >= 200) & (df_transformed['valor_brl'] <= 1000),
-        (df_transformed['valor_brl'] > 1000)
-    ]
-    valores = ['Small', 'Medium', 'High']
-    df_transformed['faixa_valor'] = np.select(condicoes, valores, default='Unknown')
+    # 4. Criando coluna categórica (faixa_valor) com pd.cut + thresholds dinâmicos
+    # Os limites são calculados automaticamente via percentis (p33 e p66) do próprio dataset
+    p33 = df_transformed['valor_brl'].quantile(0.33)
+    p66 = df_transformed['valor_brl'].quantile(0.66)
+
+    df_transformed['faixa_valor'] = pd.cut(
+        df_transformed['valor_brl'],
+        bins=[0, p33, p66, float('inf')],
+        labels=['Small', 'Medium', 'High']
+    )
     
     return df_transformed

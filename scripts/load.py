@@ -2,10 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data_to_sqlite(df: pd.DataFrame, db_path: str, table_name: str):
-    """
-    Carrega o DataFrame final no banco de dados SQLite local utilizando SQLAlchemy.
-    Se a tabela já existir, ela será substituída.
-    """
+    
     # Criando o motor do banco de dados (engine). 
     # Em sqlite o caminho usa sqlite:///caminho_absoluto_ou_relativo
     engine = create_engine(f'sqlite:///{db_path}')
