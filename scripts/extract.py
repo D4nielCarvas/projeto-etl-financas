@@ -8,7 +8,7 @@ def extract_api_data() -> dict:
     response.raise_for_status()  # Levanta erro HTTP caso a requisição falhe
     data = response.json()
     
-    # Extraindo as cotações desejadas
+    #Extraindo as cotações desejadas
     cotacoes = {
         'USD': float(data['USDBRL']['bid']),
         'EUR': float(data['EURBRL']['bid'])
@@ -16,7 +16,9 @@ def extract_api_data() -> dict:
     return cotacoes
 
 def extract_csv_data(filepath: str) -> pd.DataFrame:
-
+    """
+    Lê os dados locais de transações a partir de um arquivo CSV.
+    """
     df = pd.read_csv(filepath)
     return df
 
